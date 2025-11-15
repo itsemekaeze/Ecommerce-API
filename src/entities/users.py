@@ -1,6 +1,5 @@
 from src.database.core import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
-from datetime import datetime
 
 
 class UserModel(Base):

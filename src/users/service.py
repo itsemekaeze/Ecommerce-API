@@ -49,6 +49,7 @@ async def user_registration(
         business_name=user_info.username,
         business_id=user_info.id
     )
+
     db.add(business)
     db.commit()
     db.refresh(business)
@@ -131,6 +132,7 @@ async def upload_profile(db: Session, current_user: int, file: UploadFile = File
                 headers={"WWW-Authenticate": "Bearer"}
                 )
     file_url = "localhost:8000" + generate_file[1:]
+    
     return {
         "status": "ok",
         "data": {

@@ -62,7 +62,7 @@ async def send_email_fastmail(user, background_tasks: BackgroundTasks):
         html_content = create_email_html(user.username, verification_url)
         
         message = MessageSchema(
-            subject="EasyShopas - Verify Your Email Address",
+            subject="Ecommerce - Verify Your Email Address",
             recipients=[user.email],
             body=html_content,
             subtype=MessageType.html

@@ -4,7 +4,6 @@ from src.entities.business import BusinessModel
 from fastapi import HTTPException, status
 
 
-
 def get_all_business(db: Session, current_user: int):
     business = db.query(BusinessModel).all()
 

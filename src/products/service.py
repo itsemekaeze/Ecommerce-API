@@ -187,11 +187,11 @@ async def uploadfile_product(id: int, db: Session, current_user: int, file: Uplo
 
 
 async def update_product(id: int, product_update: ProductUpdate, db: Session, current_user: int):
-    business = db.query(BusinessModel).filter(
+    products = db.query(BusinessModel).filter(
         BusinessModel.business_id == current_user.id
     ).first()
     
-    if not business:
+    if not products:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Business not found"
@@ -205,7 +205,7 @@ async def update_product(id: int, product_update: ProductUpdate, db: Session, cu
             detail="Product not found"
         )
     
-    if product.profile_id != business.id:
+    if product.profile_id != products.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authenticated to perform this action"
