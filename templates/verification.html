@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" 
+          crossorigin="anonymous">
+    <title>Ecommerce Verification</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 30vh;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 20px;
+            text-align: center;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .card-title {
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .card-text {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        .badge-primary {
+            background-color: #007bff;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 30vh;">
+            <div class="col-md-10 col-sm-10 col-xm-12 m-auto p-4">
+                <div class="card text-center">
+                    <div class="card-header">
+                        Email Verification
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Email Verified Successfully</h5>
+                        <p class="card-text">
+                            Hello {{username}}, you can now login into your account, enjoy the free discounts 
+                        </p>
+                        <span class="badge badge-primary p-3">Eccommerce</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZ63XmFcJlSAwiGgFAW/GpGFF93hXpG5KkN" 
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" 
+            crossorigin="anonymous"></script>
+</body>
+</html>
