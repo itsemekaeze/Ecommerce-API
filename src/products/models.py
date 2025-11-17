@@ -1,23 +1,25 @@
-from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from pydantic import BaseModel
 from typing import Optional
 
 
 class ProductCreate(BaseModel):
     name: str
-    categories: str
-    description: str
-    original_price: float
-    new_price: float
-    offer_expiration_date: datetime = datetime.utcnow()
+    description: Optional[str] = None
+    price: float
+    stock: int
+    image_url: Optional[str] = None
+    category_id: int
 
+class ProductResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    price: float
+    stock: int
+    image_url: Optional[str]
+    category_id: int
+    seller_id: int
+    is_active: bool
+    
     class Config:
         from_attributes = True
-
-
-class ProductUpdate(BaseModel):
-    name: Optional[str] = None
-    categories: Optional[str] = None
-    new_price: Optional[float] = None
-    description: Optional[str] = None
-

@@ -2,16 +2,16 @@ import bcrypt
 import hashlib
 from fastapi import HTTPException, status, Depends
 import jwt
-from src.entities.users import UserModel
+from src.entities.users import User
 from dotenv import dotenv_values
 from datetime import datetime, timedelta
-from src.auth.models import TokenData
+from src.auth.models import TokenData, UserRole
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
-from typing import Optional
+from typing import Optional, List
 from src.database.core import get_db
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 config = dotenv_values(".env")
 
@@ -73,9 +73,14 @@ def get_current_user(token: str = Depends(oauth_scheme), db: Session = Depends(g
 
     token_data = verify_token(token)
 
-    user = db.query(UserModel).filter(UserModel.id == int(token_data.id)).first()
+    user = db.query(User).filter(User.id == int(token_data.id)).first()
 
     return user
 
 
-
+def require_role(allowed_roles: List[UserRole]):
+    def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in allowed_roles:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        return current_user
+    return role_checker

@@ -1,32 +1,31 @@
-from fastapi import APIRouter, File, UploadFile
-from src.users.models import UserRequest
-from src.users.service import user_registration, user_details, upload_profile
+from fastapi import APIRouter
+from src.users.models import UserResponse, UserRole
+from src.entities.users import User
 from sqlalchemy.orm import Session
-from fastapi import Depends, BackgroundTasks
+from fastapi import Depends
 from src.database.core import get_db
-from src.auth.service import get_current_user
+from src.auth.service import get_current_user, require_role
+from typing import List, Optional
+from src.users.service import list_users, update_user
 
 router = APIRouter(
     tags=["Users"],
-    prefix="/users"
+    prefix="/api/users"
 )
 
 
+@router.get("/", response_model=List[UserResponse])
+def list_users(current_user: User = Depends(require_role([UserRole.ADMIN])), db: Session = Depends(get_db)):
 
-@router.post("/registeration", status_code=201)
-async def register_user(
-    user: UserRequest, 
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
-):
-    return await user_registration(user, background_tasks, db)
+    data = list_users(db, current_user=current_user)
+    
+    return data
 
 
-@router.get("/me")
-def user_info(db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    return user_details(db, current_user=current_user)
 
+@router.put("/{user_id}", response_model=UserResponse)
+def update_users(user_id: int, full_name: Optional[str] = None, phone: Optional[str] = None, 
+                current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    data = update_user(user_id=user_id, full_name=full_name, phone=phone, current_user=current_user, db=db)
 
-@router.post("/upload/profile")
-async def user_profile(db: Session = Depends(get_db), current_user: int = Depends(get_current_user), file: UploadFile = File(...)):
-    return await upload_profile(db, current_user=current_user, file=file)
+    return data

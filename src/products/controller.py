@@ -1,39 +1,61 @@
 from fastapi import APIRouter, Depends, File, UploadFile
-from src.products.models import ProductCreate, ProductUpdate
-from src.products.service import add_new_product, get_all_products, get_individual_product, delete_product, uploadfile_product, update_product
+from src.products.models import ProductCreate, ProductResponse
+from src.products.service import create_product, list_products, get_product, update_product, delete_product, get_product_review
 from sqlalchemy.orm import Session
 from src.database.core import get_db
-from src.auth.service import get_current_user
+from src.entities.users import User
+from src.users.models import UserRole
+from typing import List
+from src.auth.service import require_role
+from src.review.models import ReviewResponse
 
 router = APIRouter(
     tags=["Products"],
-    prefix="/products"
+    prefix="/api/products"
 )
 
 
-@router.post("/create")
-async def create_products(data: ProductCreate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    return await add_new_product(product=data, db=db, current_user=current_user)
+@router.post("/", response_model=ProductResponse)
+def create_products(product: ProductCreate, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+                  db: Session = Depends(get_db)):
+    data = create_product(product, current_user, db)
+
+    return data
 
 
-@router.get("/")
-def get_products(db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    return get_all_products(db=db, current_user=current_user)
+@router.get("/", response_model=List[ProductResponse])
+def list_of_products(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+    data = list_products(skip, limit, db)
 
-@router.post("/upload/{id}")
-async def upload_products_image(id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user), file: UploadFile = File(...)):
-    return await uploadfile_product(id=id, db=db, current_user=current_user, file=file)
+    return data
 
-@router.get("/{id}")
-async def get_individual_products(id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    return await get_individual_product(id=id, db=db, current_user=current_user)
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_products(product_id: int, db: Session = Depends(get_db)):
 
+    data = get_product(product_id, db)
 
-@router.delete("/{id}")
-async def delete_products(id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    return await delete_product(id=id, db=db, current_user=current_user)
+    return data
 
 
-@router.put("/{id}")
-async def update_products(id: int, product_update: ProductUpdate, db: Session = Depends(get_db),current_user = Depends(get_current_user)):
-    return await update_product(id, product_update, db, current_user)
+@router.put("/{product_id}", response_model=ProductResponse)
+def update_products(product_id: int, product: ProductCreate, 
+                  current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+                  db: Session = Depends(get_db)):
+    
+    data = update_product(product_id, product, current_user, db)
+
+    return data
+
+
+@router.delete("/{product_id}")
+def delete_products(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+                  db: Session = Depends(get_db)):
+    
+    data = delete_product(product_id, current_user, db)
+
+    return data
+
+@router.get("/{product_id}/reviews", response_model=List[ReviewResponse])
+def get_product_reviews(product_id: int, db: Session = Depends(get_db)):
+    data = get_product_review(product_id, db)
+    return data
