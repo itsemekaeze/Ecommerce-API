@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 from typing import Optional, List
 from src.database.core import get_db
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 config = dotenv_values(".env")
 

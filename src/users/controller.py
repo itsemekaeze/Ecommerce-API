@@ -15,9 +15,9 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[UserResponse])
-def list_users(current_user: User = Depends(require_role([UserRole.ADMIN])), db: Session = Depends(get_db)):
+def list_all_users(current_user: User = Depends(require_role([UserRole.ADMIN])), db: Session = Depends(get_db)):
 
-    data = list_users(db, current_user=current_user)
+    data = list_users(current_user, db)
     
     return data
 
