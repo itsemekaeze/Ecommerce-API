@@ -84,3 +84,12 @@ def require_role(allowed_roles: List[UserRole]):
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         return current_user
     return role_checker
+
+
+def require_verified(current_user: User = Depends(get_current_user)):
+    if not current_user.is_verified:
+        raise HTTPException(
+            status_code=403, 
+            detail="Email verification required. Please verify your email to access this feature."
+        )
+    return current_user

@@ -23,8 +23,14 @@ app = FastAPI(title="Ecommerce API")
 @app.get("/")
 def root():
     return {
-        "message": "E-Commerce API",
-        "version": "1.0.0",
+        "message": "E-Commerce API with Email Verification & File Upload",
+        "version": "2.0.0",
+        "features": [
+            "Email Verification",
+            "Profile Picture Upload",
+            "Product Image Upload",
+            "Role-based Access Control"
+        ],
         "endpoints": {
             "auth": "/api/auth",
             "users": "/api/users",
@@ -35,7 +41,8 @@ def root():
             "payments": "/api/payments",
             "reviews": "/api/reviews",
             "admin": "/api/admin",
-            "seller": "/api/seller"
+            "seller": "/api/seller",
+            "uploads": "/api/upload"
         }
     }
 
@@ -51,6 +58,7 @@ app.include_router(address_routes)
 app.include_router(order_routes)
 app.include_router(payment_routes)
 app.include_router(review_routes)
+
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

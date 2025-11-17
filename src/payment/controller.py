@@ -22,7 +22,7 @@ def get_individuals_payment(payment_id: int, current_user: User = Depends(get_cu
         
     return get_payment(payment_id, current_user, db)
 
-@router.get("order/{order_id}", response_model=PaymentResponse)
+@router.get("/order/{order_id}", response_model=PaymentResponse)
 def get_payment_by_orders(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
    
     

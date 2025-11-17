@@ -36,3 +36,9 @@ class Token(BaseModel):
     token_type : str
 class TokenData(BaseModel):
     id: Optional[str] = None
+
+
+class EmailVerificationResponse(BaseModel):
+    message: str
+    email: str
+    verification_sent: bool

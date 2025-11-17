@@ -9,7 +9,7 @@ from src.address.service import create_address, list_addresses
 
 router = APIRouter(
     tags=["Shipping Address"],
-    prefix="/api/addresses"
+    prefix="/api/address"
 )
 
 
