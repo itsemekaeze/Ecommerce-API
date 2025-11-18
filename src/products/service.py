@@ -16,9 +16,7 @@ import os
 UPLOAD_DIR = Path("static")
 UPLOAD_DIR.mkdir(exist_ok=True)
 PRODUCT_IMAGES_DIR = UPLOAD_DIR / "products"
-PROFILE_IMAGES_DIR = UPLOAD_DIR / "profiles"
 PRODUCT_IMAGES_DIR.mkdir(exist_ok=True)
-PROFILE_IMAGES_DIR.mkdir(exist_ok=True)
 
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 MAX_FILE_SIZE = 5 * 1024 * 1024 

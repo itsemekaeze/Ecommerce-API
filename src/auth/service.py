@@ -2,14 +2,15 @@ import bcrypt
 import hashlib
 from fastapi import HTTPException, status, Depends
 import jwt
-from src.entities.users import User
+from src.entities.users import User, UserRole
 from dotenv import dotenv_values
 from datetime import datetime, timedelta
-from src.auth.models import TokenData, UserRole
+from src.auth.models import TokenData
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional, List
 from src.database.core import get_db
+
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -40,6 +41,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, config["SECRET"], algorithm=config["ALGORITHM"])
+
     return encoded_jwt
 
 
@@ -92,4 +94,5 @@ def require_verified(current_user: User = Depends(get_current_user)):
             status_code=403, 
             detail="Email verification required. Please verify your email to access this feature."
         )
+    
     return current_user

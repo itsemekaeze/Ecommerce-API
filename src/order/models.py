@@ -1,15 +1,7 @@
 from pydantic import BaseModel
-import enum
 from datetime import datetime
 from typing import List
-
-class OrderStatus(str, enum.Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    SHIPPED = "shipped"
-    DELIVERED = "delivered"
-    CANCELLED = "cancelled"
-
+from src.entities.order import OrderStatus
 class OrderCreate(BaseModel):
     shipping_address_id: int
 

@@ -1,10 +1,10 @@
-from src.order.models import OrderCreate, OrderStatus, OrderStatusUpdate
+from src.order.models import OrderCreate, OrderStatusUpdate
 from src.auth.service import get_current_user
 from sqlalchemy.orm import Session
 from src.entities.users import User
 from fastapi import Depends, HTTPException
 from src.database.core import get_db
-from src.entities.order import Order, OrderItem
+from src.entities.order import Order, OrderItem, OrderStatus
 from src.entities.carts import CartItem
 from src.users.models import UserRole
 from datetime import datetime
@@ -27,6 +27,7 @@ def create_order(order_data: OrderCreate, current_user: User = Depends(get_curre
         shipping_address_id=order_data.shipping_address_id,
         status=OrderStatus.PENDING
     )
+
     db.add(order)
     db.flush()
     
@@ -38,6 +39,7 @@ def create_order(order_data: OrderCreate, current_user: User = Depends(get_curre
             quantity=cart_item.quantity,
             price=cart_item.product.price
         )
+
         db.add(order_item)
         
         
@@ -45,10 +47,12 @@ def create_order(order_data: OrderCreate, current_user: User = Depends(get_curre
     
     
     for cart_item in cart_items:
+
         db.delete(cart_item)
     
     db.commit()
     db.refresh(order)
+    
     return order
 
 

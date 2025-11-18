@@ -64,6 +64,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     
     user.is_verified = True
     user.verification_token = None
+
     db.commit()
     
     return {
@@ -91,7 +92,7 @@ def resend_verification(email: EmailStr, db: Session = Depends(get_db)):
     email_sent = send_verification_email(user.email, user.username, verification_token)
     
     return {
-        "message": "Verification email sent successfully",
+        "message": "Verification email was sent successfully",
         "email": email,
         "verification_sent": email_sent
     }

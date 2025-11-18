@@ -1,11 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-import enum
-
-class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    SELLER = "seller"
-    CUSTOMER = "customer"
+from src.entities.users import UserRole
 
 class UserCreate(BaseModel):
     email: EmailStr
