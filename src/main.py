@@ -13,11 +13,21 @@ from src.address.controller import router as address_routes
 from src.admin import router as admin_routes
 from src.sellers import router as sellers_routes
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 
 table_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Ecommerce API")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
