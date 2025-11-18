@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class AddressCreate(BaseModel):
     street: str
     city: str

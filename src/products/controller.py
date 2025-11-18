@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, UploadFile, Form
-from src.products.models import ProductCreate, ProductResponse
+from src.products.models import ProductResponse
 from src.products.service import create_product, list_products, get_product, update_product, delete_product, get_product_review, upload_product_image
 from sqlalchemy.orm import Session
 from src.database.core import get_db
@@ -75,6 +75,7 @@ def delete_products(product_id: int, current_user: User = Depends(require_role([
 @router.post("/upload/product-image")
 async def upload_product_images(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     return await upload_product_image(file, current_user, db)
+
 
 @router.get("/{product_id}/reviews", response_model=List[ReviewResponse])
 def get_product_reviews(product_id: int, db: Session = Depends(get_db)):

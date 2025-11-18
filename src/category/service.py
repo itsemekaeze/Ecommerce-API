@@ -8,8 +8,6 @@ from src.auth.service import require_role
 from src.users.models import UserRole
 
 
-
-
 def create_category(category: CategoryCreate, current_user: User = Depends(require_role([UserRole.ADMIN])), 
                    db: Session = Depends(get_db)):
     db_category = Category(**category.dict())
@@ -48,4 +46,5 @@ def delete_category(category_id: int, current_user: User = Depends(require_role(
     
     db.delete(db_category)
     db.commit()
+    
     return Response(status_code=status.HTTP_204_NO_CONTENT)

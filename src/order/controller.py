@@ -34,4 +34,5 @@ def get_individual_order(order_id: int, current_user: User = Depends(get_current
 def update_orders_status(order_id: int, status_update: OrderStatusUpdate, 
                        current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
                        db: Session = Depends(get_db)):
+    
     return update_order_status(order_id, status_update, current_user, db)

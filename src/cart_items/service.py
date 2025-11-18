@@ -3,7 +3,7 @@ from src.cart_items.models import CartItemCreate
 from src.entities.carts import CartItem
 from src.entities.users import User
 from src.entities.products import Product
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Response, status
 from src.auth.service import get_current_user
 from src.database.core import get_db
 
@@ -54,4 +54,5 @@ def remove_from_cart(item_id: int, current_user: User = Depends(get_current_user
     
     db.delete(cart_item)
     db.commit()
-    return {"message": "Item removed from cart"}
+    
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

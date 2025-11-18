@@ -9,13 +9,13 @@ config = dotenv_values(".env")
 def create_verification_token() -> str:
     return str(uuid.uuid4())
 
-# Email utility
+
 def send_verification_email(email: str, username: str, token: str) -> bool:
     try:
-        # Create verification link
+        
         verification_link = f"http://localhost:8000/api/auth/verify-email?token={token}"
         
-        # Create message
+        
         message = MIMEMultipart("alternative")
         message["Subject"] = "Verify Your E-Commerce Account"
         message["From"] = config["EMAIL"]
@@ -55,7 +55,7 @@ def send_verification_email(email: str, username: str, token: str) -> bool:
         part = MIMEText(html, "html")
         message.attach(part)
         
-        # Send email
+        
         with smtplib.SMTP(config["MAIL_SERVER"], config["MAIL_PORT"]) as server:
             server.starttls()
             server.login(config["EMAIL"], config["PASSWORD"])

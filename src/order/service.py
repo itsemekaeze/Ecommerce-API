@@ -11,8 +11,6 @@ from datetime import datetime
 from src.auth.service import require_role
 
 
-
-
 def create_order(order_data: OrderCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     
     cart_items = db.query(CartItem).filter(CartItem.user_id == current_user.id).all()

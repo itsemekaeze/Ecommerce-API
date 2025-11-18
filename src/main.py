@@ -72,8 +72,3 @@ app.include_router(review_routes)
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-
-
-

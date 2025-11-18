@@ -14,11 +14,6 @@ class UserCreate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     role: UserRole = UserRole.CUSTOMER
-
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
 class UserResponse(BaseModel):
     id: int
     email: str
@@ -34,6 +29,7 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type : str
+
 class TokenData(BaseModel):
     id: Optional[str] = None
 

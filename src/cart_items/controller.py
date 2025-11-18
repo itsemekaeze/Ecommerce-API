@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends
 from src.cart_items.models import CartItemResponse, CartItemCreate
 from src.cart_items.service import add_to_cart, get_cart, update_cart_item, remove_from_cart
 from sqlalchemy.orm import Session
 from src.database.core import get_db
 from src.entities.users import User
-from src.users.models import UserRole
 from typing import List
 from src.auth.service import get_current_user
 

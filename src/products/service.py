@@ -1,9 +1,7 @@
 from sqlalchemy.orm import Session
-from src.products.models import ProductCreate
 from src.users.models import UserRole
 from src.entities.products import Product
 from src.entities.users import User
-from datetime import datetime
 from fastapi import HTTPException, status, Response, Depends, UploadFile, File, Form
 from src.auth.service import require_role
 from src.database.core import get_db

@@ -5,11 +5,11 @@ from src.entities.payments import Payment, PaymentStatus
 from src.database.core import get_db
 from src.payment.models import PaymentCreate
 from src.entities.users import User, UserRole
+import uuid
 from src.auth.service import get_current_user
 
 
-def process_payment(payment_data: PaymentCreate, current_user: User = Depends(get_current_user), 
-                   db: Session = Depends(get_db)):
+def process_payment(payment_data: PaymentCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == payment_data.order_id, Order.customer_id == current_user.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -19,7 +19,7 @@ def process_payment(payment_data: PaymentCreate, current_user: User = Depends(ge
         raise HTTPException(status_code=400, detail="Payment already processed")
     
     
-    import uuid
+    
     transaction_id = str(uuid.uuid4())
     
     payment = Payment(
@@ -58,6 +58,7 @@ def get_payment_by_order(order_id: int, current_user: User = Depends(get_current
         raise HTTPException(status_code=403, detail="Not authorized")
     
     payment = db.query(Payment).filter(Payment.order_id == order_id).first()
+    
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")
     

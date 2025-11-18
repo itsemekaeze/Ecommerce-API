@@ -17,8 +17,8 @@ router = APIRouter(
 
 
 @router.get("/stats")
-def get_seller_stats(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
-                    db: Session = Depends(get_db)):
+def get_seller_stats(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+    
     total_products = db.query(Product).filter(Product.seller_id == current_user.id).count()
     active_products = db.query(Product).filter(
         Product.seller_id == current_user.id,

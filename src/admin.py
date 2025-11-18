@@ -35,6 +35,6 @@ def get_admin_stats(current_user: User = Depends(require_role([UserRole.ADMIN]))
     }
 
 @router.get("/orders", response_model=List[OrderResponse])
-def get_all_orders(current_user: User = Depends(require_role([UserRole.ADMIN])), 
-                  skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+def get_all_orders(current_user: User = Depends(require_role([UserRole.ADMIN])), skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+    
     return db.query(Order).offset(skip).limit(limit).all()

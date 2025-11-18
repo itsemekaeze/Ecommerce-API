@@ -30,7 +30,6 @@ class Order(Base):
 
 
 
-
 class OrderItem(Base):
     __tablename__ = "order_items"
     id = Column(Integer, primary_key=True, index=True)
