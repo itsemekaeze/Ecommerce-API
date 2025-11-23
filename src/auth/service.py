@@ -88,6 +88,7 @@ def require_role(allowed_roles: List[UserRole]):
     return role_checker
 
 
+
 def require_verified(current_user: User = Depends(get_current_user)):
     if not current_user.is_verified:
         raise HTTPException(

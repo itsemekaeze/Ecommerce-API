@@ -1,5 +1,5 @@
 from src.address.models import AddressCreate
-from src.auth.service import get_current_user
+from src.auth.service import get_current_user, require_role
 from sqlalchemy.orm import Session
 from src.entities.users import User, UserRole
 from fastapi import Depends, HTTPException, status
@@ -7,7 +7,7 @@ from src.database.core import get_db
 from src.entities.shipping_address import Address
 
 
-def create_address(address: AddressCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_address(address: AddressCreate, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     if UserRole.CUSTOMER != current_user.role:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     db_address = Address(user_id=current_user.id, **address.dict())
@@ -18,7 +18,7 @@ def create_address(address: AddressCreate, current_user: User = Depends(get_curr
     return db_address
 
 
-def list_addresses(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def list_addresses(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     if UserRole.CUSTOMER != current_user.role:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     

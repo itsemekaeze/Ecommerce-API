@@ -68,7 +68,7 @@ async def create_products(
     stock: int = Form(...),
     category_id: int = Form(...),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role(UserRole.SELLER)),
+    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
     db: Session = Depends(get_db)
 ):
     data = create_product(name, description, price, stock, category_id, image, current_user, db)
@@ -77,15 +77,15 @@ async def create_products(
 
 
 @router.get("/", response_model=List[ProductResponse])
-def list_of_products(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
-    data = list_products(skip, limit, db)
+def list_of_products(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+    data = list_products(current_user,skip, limit, db)
 
     return data
 
 @router.get("/{product_id}", response_model=ProductResponse)
-def get_products(product_id: int, db: Session = Depends(get_db)):
+def get_products(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
 
-    data = get_product(product_id, db)
+    data = get_product(product_id, current_user, db)
 
     return data
 
@@ -99,7 +99,7 @@ async def update_products(
     stock: Optional[int] = Form(None),
     category_id: Optional[int] = Form(None),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role(UserRole.SELLER)),
+    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
     db: Session = Depends(get_db)
 ):
     
@@ -109,7 +109,7 @@ async def update_products(
 
 
 @router.delete("/{product_id}")
-def delete_products(product_id: int, current_user: User = Depends(require_role(UserRole.SELLER)), 
+def delete_products(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
                   db: Session = Depends(get_db)):
     
     data = delete_product(product_id, current_user, db)
@@ -123,7 +123,7 @@ async def upload_product_images(file: UploadFile = File(...), current_user: User
 
 
 @router.get("/{product_id}/reviews", response_model=List[ReviewResponse])
-def get_product_reviews(product_id: int, db: Session = Depends(get_db)):
-    data = get_product_review(product_id, db)
+def get_product_reviews(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+    data = get_product_review(product_id, current_user, db)
     return data
 

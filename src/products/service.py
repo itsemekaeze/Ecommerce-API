@@ -22,7 +22,7 @@ async def create_product(
     stock: int = Form(...),
     category_id: int = Form(...),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role(UserRole.SELLER)),
+    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
     db: Session = Depends(get_db)
 ):
     image_url = None
@@ -46,11 +46,11 @@ async def create_product(
     return db_product
 
 
-def list_products(skip: int, limit: int, db: Session = Depends(get_db)):
+def list_products(skip: int, limit: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     return db.query(Product).filter(Product.is_active == True).offset(skip).limit(limit).all()
 
 
-def get_product(product_id: int, db: Session = Depends(get_db)):
+def get_product(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -66,14 +66,14 @@ async def update_product(
     stock: Optional[int] = Form(None),
     category_id: Optional[int] = Form(None),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role(UserRole.SELLER)),
+    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
     db: Session = Depends(get_db)
 ):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if current_user.role != UserRole.SELLER and db_product.seller_id != current_user.id:
+    if current_user.role != UserRole.ADMIN and db_product.seller_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if name:
@@ -99,7 +99,7 @@ async def update_product(
     return db_product
 
 
-def delete_product(product_id: int, current_user: User = Depends(require_role(UserRole.SELLER)), 
+def delete_product(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
                   db: Session = Depends(get_db)):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
@@ -113,7 +113,7 @@ def delete_product(product_id: int, current_user: User = Depends(require_role(Us
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def get_product_review(product_id: int, db: Session = Depends(get_db)):
+def get_product_review(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
     return db.query(Review).filter(Review.product_id == product_id).all()
 
 

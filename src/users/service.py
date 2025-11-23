@@ -18,14 +18,14 @@ def list_users(current_user: User = Depends(require_role(UserRole.ADMIN)), db: S
 
 
 def update_user(user_id: int, full_name: Optional[str] = None, phone: Optional[str] = None, 
-                current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+                current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if UserRole.CUSTOMER != current_user.role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
+    # if UserRole.CUSTOMER != current_user.role:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
     if full_name:
         user.full_name = full_name
     if phone:
@@ -37,15 +37,15 @@ def update_user(user_id: int, full_name: Optional[str] = None, phone: Optional[s
     return user
 
 
-def get_profiles(current_user: User = Depends(get_current_user)):
-    if UserRole.CUSTOMER != current_user.role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
+def get_profiles(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER]))):
+    # if UserRole.CUSTOMER != current_user.role:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
     return current_user
 
-async def upload_profile_picture(file: UploadFile, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def upload_profile_picture(file: UploadFile, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
 
-    if UserRole.CUSTOMER != current_user.role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
+    # if UserRole.CUSTOMER != current_user.role:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
     
     validate_image_file(file)
 

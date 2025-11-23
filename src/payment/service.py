@@ -9,7 +9,7 @@ import uuid
 from src.auth.service import get_current_user, require_role
 
 
-def process_payment(payment_data: PaymentCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def process_payment(payment_data: PaymentCreate, current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == payment_data.order_id, Order.customer_id == current_user.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -37,7 +37,7 @@ def process_payment(payment_data: PaymentCreate, current_user: User = Depends(ge
     db.refresh(payment)
     return payment
 
-def get_all_payment(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_all_payment(current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     if UserRole.CUSTOMER != current_user.role:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     payments = db.query(Payment).all()
@@ -45,7 +45,7 @@ def get_all_payment(current_user: User = Depends(get_current_user), db: Session 
     return payments
 
 
-def get_payment(payment_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_payment(payment_id: int, current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     payment = db.query(Payment).filter(Payment.id == payment_id).first()
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")
@@ -58,7 +58,7 @@ def get_payment(payment_id: int, current_user: User = Depends(get_current_user),
     return payment
 
 
-def get_payment_by_order(order_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
+def get_payment_by_order(order_id: int, current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
