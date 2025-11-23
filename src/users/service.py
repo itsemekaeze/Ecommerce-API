@@ -18,7 +18,7 @@ def list_users(current_user: User = Depends(require_role(UserRole.ADMIN)), db: S
 
 
 def update_user(user_id: int, full_name: Optional[str] = None, phone: Optional[str] = None, 
-                current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
+                current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
     if current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     user = db.query(User).filter(User.id == user_id).first()
@@ -37,12 +37,12 @@ def update_user(user_id: int, full_name: Optional[str] = None, phone: Optional[s
     return user
 
 
-def get_profiles(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER]))):
+def get_profiles(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER]))):
     # if UserRole.CUSTOMER != current_user.role:
     #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
     return current_user
 
-async def upload_profile_picture(file: UploadFile, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
+async def upload_profile_picture(file: UploadFile, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
 
     # if UserRole.CUSTOMER != current_user.role:
     #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Permission")
@@ -53,7 +53,8 @@ async def upload_profile_picture(file: UploadFile, current_user: User = Depends(
     saved_path = save_upload_file(file, PROFILE_IMAGES_DIR)
 
     
-    upload_result = cloudinary.uploader.upload(saved_path)
+    upload_result = cloudinary.uploader.upload(saved_path,
+                                               folder="hello")
 
     
     image_url = upload_result.get("secure_url")

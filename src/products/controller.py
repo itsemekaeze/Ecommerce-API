@@ -78,7 +78,7 @@ async def create_products(
 
 @router.get("/", response_model=List[ProductResponse])
 def list_of_products(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
-    data = list_products(current_user,skip, limit, db)
+    data = list_products(current_user, skip, limit, db)
 
     return data
 

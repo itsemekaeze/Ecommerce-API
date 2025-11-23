@@ -46,7 +46,7 @@ async def create_product(
     return db_product
 
 
-def list_products(skip: int, limit: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+def list_products(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), skip: int  = 0, limit: int = 50, db: Session = Depends(get_db)):
     return db.query(Product).filter(Product.is_active == True).offset(skip).limit(limit).all()
 
 

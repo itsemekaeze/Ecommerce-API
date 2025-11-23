@@ -8,8 +8,8 @@ from src.entities.shipping_address import Address
 
 
 def create_address(address: AddressCreate, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
-    if UserRole.CUSTOMER != current_user.role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    # if UserRole.CUSTOMER != current_user.role:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     db_address = Address(user_id=current_user.id, **address.dict())
     db.add(db_address)
     db.commit()
@@ -19,7 +19,7 @@ def create_address(address: AddressCreate, current_user: User = Depends(require_
 
 
 def list_addresses(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER, UserRole.ADMIN])), db: Session = Depends(get_db)):
-    if UserRole.CUSTOMER != current_user.role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    # if UserRole.CUSTOMER != current_user.role:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     
     return db.query(Address).filter(Address.user_id == current_user.id).all()
