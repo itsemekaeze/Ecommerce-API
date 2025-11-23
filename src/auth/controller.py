@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from src.database.core import get_db
-from src.entities.users import User
+from src.entities.users import User, UserRole
 from pydantic import EmailStr
 from fastapi.security import OAuth2PasswordRequestForm
 from src.auth.service import verify_password, create_access_token, get_hashed_password, get_current_user
@@ -17,85 +17,85 @@ router = APIRouter(
 
 @router.post("/register", response_model=EmailVerificationResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-
-    if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-    if db.query(User).filter(User.username == user.username).first():
-        raise HTTPException(status_code=400, detail="Username already taken")
+    db_user = db.query(User).filter(
+        (User.email == user.email) | (User.username == user.username)
+    ).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email or username already registered")
     
     verification_token = create_verification_token()
-
+    hashed_password = get_hashed_password(user.password)
+    
     db_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=get_hashed_password(user.password),
         full_name=user.full_name,
-        phone=user.phone,
+        hashed_password=hashed_password,
         verification_token=verification_token,
-        role=user.role,
+        is_active=True,
         is_verified=False
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    email_result = send_verification_email(user.email, verification_token)
+    
+    if email_result["success"]:
+        return EmailVerificationResponse(
+            message="Registration successful! Please check your email to verify your account.",
+            email=user.email,
+            status="pending_verification"
+        )
+    else:
+        return EmailVerificationResponse(
+            message="Registration failed! Email could not be sent. Please use the verification link below.",
+            email=user.email,
+            status="email_failed"
+        )
 
 
-    email_sent = send_verification_email(user.email, user.username, verification_token)
-
-    return {
-        "message": "Registration successful! Please check your email to verify your account.",
-        "email": user.email,
-        "verification_sent": email_sent
-    }
-
-@router.get("/verify-email")
-def verify_email(token: str, db: Session = Depends(get_db)):
+@router.get("/verify-email", response_model=EmailVerificationResponse)
+async def verify_email(token: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.verification_token == token).first()
     
     if not user:
-        raise HTTPException(status_code=400, detail="Invalid or expired verification token")
+        raise HTTPException(status_code=400, detail="Invalid verification token")
     
     if user.is_verified:
-        return {
-            "message": "Email already verified",
-            "verified": True,
-            "redirect_to_login": True
-        }
+        return EmailVerificationResponse(message="Email already verified", email=user.email, status="already_verified")
     
     user.is_verified = True
     user.verification_token = None
-
     db.commit()
     
-    return {
-        "message": "Email verified successfully! You can now login.",
-        "verified": True,
-        "redirect_to_login": True
-    }
+    return EmailVerificationResponse(message="Email verified successfully! You can now login.", email=user.email, status="verified")
 
-@router.post("/resend-verification")
-def resend_verification(email: EmailStr, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == email).first()
+@router.post("/resend-verification", response_model=EmailVerificationResponse)
+async def resend_verification(email: EmailStr, db: Session = Depends(get_db)):
+    
+    user = db.query(User).filter(User.email == email.lower()).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     if user.is_verified:
-        return {"message": "Email already verified", "already_verified": True}
+        return EmailVerificationResponse(message="Email is already verified", email=user.email, status="already_verified")
     
-    
-    verification_token = create_verification_token()
-    user.verification_token = verification_token
+    new_token = create_verification_token()
+    user.verification_token = new_token
     db.commit()
     
+    email_result = send_verification_email(user.email, new_token)
     
-    email_sent = send_verification_email(user.email, user.username, verification_token)
-    
-    return {
-        "message": "Verification email was sent successfully",
-        "email": email,
-        "verification_sent": email_sent
-    }
+    if email_result["success"]:
+        return EmailVerificationResponse(message="Verification email resent!", email=user.email, status="email_resent")
+    else:
+        return EmailVerificationResponse(
+            message="Could not send email. Please use the verification link below.",
+            email=user.email,
+            status="email_failed"
+        )
 
 
 @router.post("/login", response_model=Token)
@@ -118,7 +118,5 @@ async def login_user(
     return {"access_token": access_token, "token_type": "bearer"}
     
 
-@router.get("/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user)):
 
-    return current_user
+

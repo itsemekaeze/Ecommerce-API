@@ -8,7 +8,7 @@ class UserResponse(BaseModel):
     username: str
     full_name: Optional[str]
     phone: Optional[str]
-    role: UserRole
+    # role: UserRole
     is_active: bool
     
     class Config:

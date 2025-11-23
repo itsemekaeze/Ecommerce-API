@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.entities.order import Order, OrderStatus
 from src.entities.payments import Payment, PaymentStatus
@@ -6,14 +6,15 @@ from src.database.core import get_db
 from src.payment.models import PaymentCreate
 from src.entities.users import User, UserRole
 import uuid
-from src.auth.service import get_current_user
+from src.auth.service import get_current_user, require_role
 
 
 def process_payment(payment_data: PaymentCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == payment_data.order_id, Order.customer_id == current_user.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    
+    if UserRole.CUSTOMER != current_user.role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     existing_payment = db.query(Payment).filter(Payment.order_id == order.id).first()
     if existing_payment:
         raise HTTPException(status_code=400, detail="Payment already processed")
@@ -36,6 +37,13 @@ def process_payment(payment_data: PaymentCreate, current_user: User = Depends(ge
     db.refresh(payment)
     return payment
 
+def get_all_payment(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if UserRole.CUSTOMER != current_user.role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    payments = db.query(Payment).all()
+    
+    return payments
+
 
 def get_payment(payment_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     payment = db.query(Payment).filter(Payment.id == payment_id).first()
@@ -45,11 +53,12 @@ def get_payment(payment_id: int, current_user: User = Depends(get_current_user),
     order = db.query(Order).filter(Order.id == payment.order_id).first()
     if order.customer_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+    if UserRole.CUSTOMER != current_user.role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     return payment
 
 
-def get_payment_by_order(order_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_payment_by_order(order_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")

@@ -6,51 +6,13 @@ from fastapi import HTTPException, status, Response, Depends, UploadFile, File, 
 from src.auth.service import require_role
 from src.database.core import get_db
 from src.entities.reviews import Review
-import uuid
-import shutil
 from typing import Optional
-from pathlib import Path
 import os
+from src.upload_settings import save_upload_file, validate_image_file, PRODUCT_IMAGES_DIR
+from ..cloudinary_config import cloudinary
+import cloudinary.uploader
+from src.entities.images import Image
 
-
-UPLOAD_DIR = Path("static")
-UPLOAD_DIR.mkdir(exist_ok=True)
-PRODUCT_IMAGES_DIR = UPLOAD_DIR / "products"
-PRODUCT_IMAGES_DIR.mkdir(exist_ok=True)
-
-ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-MAX_FILE_SIZE = 5 * 1024 * 1024 
-
-
-def validate_image_file(file: UploadFile) -> None:
-    
-    file_ext = Path(file.filename).suffix.lower()
-    if file_ext not in ALLOWED_IMAGE_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_IMAGE_EXTENSIONS)}"
-        )
-    
-    
-    file.file.seek(0, 2)
-    file_size = file.file.tell()
-    file.file.seek(0)
-    
-    if file_size > MAX_FILE_SIZE:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large. Maximum size: {MAX_FILE_SIZE / (1024*1024)}MB"
-        )
-
-def save_upload_file(file: UploadFile, directory: Path) -> str:
-    file_ext = Path(file.filename).suffix.lower()
-    unique_filename = f"{uuid.uuid4()}{file_ext}"
-    file_path = directory / unique_filename
-
-    with file_path.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    return str(file_path)
 
 
 async def create_product(
@@ -60,7 +22,7 @@ async def create_product(
     stock: int = Form(...),
     category_id: int = Form(...),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
+    current_user: User = Depends(require_role(UserRole.SELLER)),
     db: Session = Depends(get_db)
 ):
     image_url = None
@@ -104,14 +66,14 @@ async def update_product(
     stock: Optional[int] = Form(None),
     category_id: Optional[int] = Form(None),
     image: Optional[UploadFile] = File(None),
-    current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])),
+    current_user: User = Depends(require_role(UserRole.SELLER)),
     db: Session = Depends(get_db)
 ):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if current_user.role != UserRole.ADMIN and db_product.seller_id != current_user.id:
+    if current_user.role != UserRole.SELLER and db_product.seller_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if name:
@@ -137,13 +99,13 @@ async def update_product(
     return db_product
 
 
-def delete_product(product_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+def delete_product(product_id: int, current_user: User = Depends(require_role(UserRole.SELLER)), 
                   db: Session = Depends(get_db)):
     db_product = db.query(Product).filter(Product.id == product_id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if current_user.role != UserRole.ADMIN and db_product.seller_id != current_user.id:
+    if current_user.role != UserRole.SELLER and db_product.seller_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     db_product.is_active = False
@@ -155,15 +117,31 @@ def get_product_review(product_id: int, db: Session = Depends(get_db)):
     return db.query(Review).filter(Review.product_id == product_id).all()
 
 
-async def upload_product_image(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+async def upload_product_image(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER])), db: Session = Depends(get_db)):
 
+        
     validate_image_file(file)
+
     
+    saved_path = save_upload_file(file, PRODUCT_IMAGES_DIR)
+
     
-    file_path = save_upload_file(file, PRODUCT_IMAGES_DIR)
+    upload_result = cloudinary.uploader.upload(saved_path)
+
     
+    image_url = upload_result.get("secure_url")
+    public_id = upload_result.get("public_id")
+
+    
+    image_record = Image(url=image_url, public_id=public_id)
+    db.add(image_record)
+    db.commit()
+    db.refresh(image_record)
+
     return {
         "message": "Product image uploaded successfully",
-        "file_path": file_path,
-        "file_url": f"/uploads/products/{Path(file_path).name}"
+        "image_url": image_url,
+        "public_id": public_id,
+        "file_path": saved_path,
+        "id": image_record.id
     }

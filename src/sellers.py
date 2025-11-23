@@ -8,6 +8,7 @@ from src.auth.service import require_role
 from src.database.core import get_db
 from typing import List
 from src.products.models import ProductResponse
+from sqlalchemy import func
 
 router = APIRouter(
     tags=["Seller Dashboard"],
@@ -17,7 +18,7 @@ router = APIRouter(
 
 
 @router.get("/stats")
-def get_seller_stats(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+def get_seller_stats(current_user: User = Depends(require_role(UserRole.SELLER)), db: Session = Depends(get_db)):
     
     total_products = db.query(Product).filter(Product.seller_id == current_user.id).count()
     active_products = db.query(Product).filter(
@@ -26,12 +27,9 @@ def get_seller_stats(current_user: User = Depends(require_role([UserRole.SELLER,
     ).count()
     
     
-    revenue = db.query(OrderItem).join(Product).join(Order).filter(
-        Product.seller_id == current_user.id,
-        Order.status != OrderStatus.CANCELLED
-    ).with_entities(
-        db.query(OrderItem.price * OrderItem.quantity).label('total')
-    ).scalar() or 0
+    revenue = (db.query(func.sum(OrderItem.price * OrderItem.quantity)).join(Product).join(Order).filter(
+        Product.seller_id == current_user.id, Order.status != OrderStatus.CANCELLED).scalar()) or 0
+   
     
     return {
         "total_products": total_products,
@@ -41,12 +39,12 @@ def get_seller_stats(current_user: User = Depends(require_role([UserRole.SELLER,
 
 
 @router.get("/products", response_model=List[ProductResponse])
-def get_seller_products(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+def get_seller_products(current_user: User = Depends(require_role(UserRole.SELLER)), 
                        db: Session = Depends(get_db)):
     return db.query(Product).filter(Product.seller_id == current_user.id).all()
 
 @router.get("/orders", response_model=List[OrderResponse])
-def get_seller_orders(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+def get_seller_orders(current_user: User = Depends(require_role(UserRole.SELLER)), 
                      db: Session = Depends(get_db)):
     
     orders = db.query(Order).join(OrderItem).join(Product).filter(

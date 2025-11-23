@@ -6,7 +6,7 @@ from fastapi import Depends
 from src.database.core import get_db
 from src.auth.service import get_current_user, require_role, require_verified
 from typing import List, Optional
-from src.users.service import list_users, update_user, upload_profile_picture
+from src.users.service import list_users, update_user, upload_profile_picture, get_profiles
 
 router = APIRouter(
     tags=["Users"],
@@ -30,7 +30,13 @@ def update_users(user_id: int, full_name: Optional[str] = None, phone: Optional[
 
     return data
 
-@router.post("/upload/profile-picture", response_model=UserResponse)
-async def upload_user_profile(file: UploadFile = File(...), current_user: User = Depends(require_verified), db: Session = Depends(get_db)):
+
+@router.get("/profile", response_model=UserResponse)
+def get_profile(current_user: User = Depends(get_current_user)):
+
+    return get_profiles(current_user)
+
+@router.post("/upload/profile-picture")
+async def upload_user_profile(file: UploadFile = File(...), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     
     return await upload_profile_picture(file, current_user, db)
