@@ -13,8 +13,7 @@ def process_payment(payment_data: PaymentCreate, current_user: User = Depends(re
     order = db.query(Order).filter(Order.id == payment_data.order_id, Order.customer_id == current_user.id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    
     existing_payment = db.query(Payment).filter(Payment.order_id == order.id).first()
     if existing_payment:
         raise HTTPException(status_code=400, detail="Payment already processed")
@@ -38,8 +37,7 @@ def process_payment(payment_data: PaymentCreate, current_user: User = Depends(re
     return payment
 
 def get_all_payment(current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+   
     payments = db.query(Payment).all()
     
     return payments
@@ -53,8 +51,7 @@ def get_payment(payment_id: int, current_user: User = Depends(require_role([User
     order = db.query(Order).filter(Order.id == payment.order_id).first()
     if order.customer_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Not authorized")
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    
     return payment
 
 

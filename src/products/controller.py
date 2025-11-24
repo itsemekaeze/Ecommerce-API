@@ -118,7 +118,7 @@ def delete_products(product_id: int, current_user: User = Depends(require_role([
 
 
 @router.post("/upload/product-image")
-async def upload_product_images(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER])), db: Session = Depends(get_db)):
+async def upload_product_images(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     return await upload_product_image(file, current_user, db)
 
 

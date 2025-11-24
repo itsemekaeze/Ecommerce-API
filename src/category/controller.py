@@ -32,14 +32,14 @@ def list_categories(current_user: User = Depends(require_role([UserRole.SELLER, 
 
 @router.put("/{category_id}", response_model=CategoryResponse)
 def update_categories(category_id: int, category: CategoryCreate, 
-                   current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
+                   current_user: User = Depends(require_role([UserRole.ADMIN])), db: Session = Depends(get_db)):
     data = update_category(category_id, category, current_user, db)
 
     return data
 
 
 @router.delete("/{category_id}")
-def delete_categories(category_id: int, current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), 
+def delete_categories(category_id: int, current_user: User = Depends(require_role([UserRole.ADMIN])), 
                    db: Session = Depends(get_db)):
     data = delete_category(category_id, current_user, db)
 

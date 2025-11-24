@@ -58,6 +58,5 @@ def remove_user(
     current_user: User = Depends(require_role([UserRole.ADMIN])), 
     db: Session = Depends(get_db)
 ):
-    
-        
+            
     return delete_user(user_id, current_user, db)

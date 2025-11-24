@@ -27,9 +27,6 @@ def create_order(
         )
         .all()
     )
-
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     
     if not cart_items:
         raise HTTPException(status_code=400, detail="No valid cart items selected for order")
@@ -80,8 +77,8 @@ def create_order(
 
 def list_orders(current_user: User = Depends(require_role([UserRole.CUSTOMER, UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.customer_id == current_user.id).all()
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+   
+    
     return order
 
 
@@ -93,8 +90,7 @@ def get_order(order_id: int, current_user: User = Depends(require_role([UserRole
     
     if order.customer_id != current_user.id and current_user.role not in [UserRole.ADMIN, UserRole.CUSTOMER]:
         raise HTTPException(status_code=403, detail="Not authorized")
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
+    
     
     return order
 

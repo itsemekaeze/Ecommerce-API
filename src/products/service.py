@@ -117,7 +117,7 @@ def get_product_review(product_id: int, current_user: User = Depends(require_rol
     return db.query(Review).filter(Review.product_id == product_id).all()
 
 
-async def upload_product_image(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER])), db: Session = Depends(get_db)):
+async def upload_product_image(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
 
         
     validate_image_file(file)
@@ -126,7 +126,7 @@ async def upload_product_image(file: UploadFile = File(...), current_user: User 
     saved_path = save_upload_file(file, PRODUCT_IMAGES_DIR)
 
     
-    upload_result = cloudinary.uploader.upload(saved_path)
+    upload_result = cloudinary.uploader.upload(saved_path, folder="Uploading")
 
     
     image_url = upload_result.get("secure_url")

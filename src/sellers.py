@@ -43,6 +43,7 @@ def get_seller_products(current_user: User = Depends(require_role(UserRole.SELLE
                        db: Session = Depends(get_db)):
     return db.query(Product).filter(Product.seller_id == current_user.id).all()
 
+
 @router.get("/orders", response_model=List[OrderResponse])
 def get_seller_orders(current_user: User = Depends(require_role(UserRole.SELLER)), 
                      db: Session = Depends(get_db)):

@@ -10,7 +10,7 @@ def create_verification_token() -> str:
     return str(uuid.uuid4())
 
 def send_verification_email(email: str, token: str) -> dict:
-    """Send verification email to user."""
+    
     verification_link = f"http://localhost:8000/api/auth/verify-email?token={token}"
     
     if not config["EMAIL_ENABLED"]:

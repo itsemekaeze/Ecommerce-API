@@ -15,8 +15,6 @@ def create_review(review: ReviewCreate, current_user: User = Depends(require_rol
     product = db.query(Product).filter(Product.id == review.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    # if UserRole.CUSTOMER != current_user.role:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Insufficient Permission")
     
     has_purchased = db.query(OrderItem).join(Order).filter(
         Order.customer_id == current_user.id,

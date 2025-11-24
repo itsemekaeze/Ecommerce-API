@@ -7,6 +7,7 @@ from pathlib import Path
 
 UPLOAD_DIR = Path("static")
 UPLOAD_DIR.mkdir(exist_ok=True)
+
 PROFILE_IMAGES_DIR = UPLOAD_DIR / "profiles"
 PROFILE_IMAGES_DIR.mkdir(exist_ok=True)
 
