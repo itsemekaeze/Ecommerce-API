@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from src.database.core import engine, Base, SessionLocal
 from src.database import init_db
 from src.entities import users, products, carts, category, order, payments, reviews, shipping_address as table_models 
@@ -16,10 +16,9 @@ from src.sellers import router as sellers_routes
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from src.entities.users import UserRole, User
-from src.auth.service import get_current_user
 
 table_models.Base.metadata.create_all(bind=engine)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,19 +69,6 @@ def root():
         }
     }
 
-
-@app.get("/check-role")
-def check_role(current_user: User = Depends(get_current_user)):
-    return {
-        "user_id": current_user.id,
-        "username": current_user.username,
-        "role_value": current_user.role,
-        "role_type": str(type(current_user.role)),
-        "is_admin_enum": current_user.role == UserRole.ADMIN,
-        "is_admin_string": str(current_user.role) == "admin",
-        "admin_enum_value": UserRole.ADMIN,
-        "admin_enum_type": str(type(UserRole.ADMIN))
-    }
 
 app.include_router(login_routes)
 app.include_router(user_routes)
