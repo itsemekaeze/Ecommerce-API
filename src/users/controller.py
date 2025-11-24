@@ -25,18 +25,18 @@ def list_all_users(current_user: User = Depends(require_role([UserRole.ADMIN])),
 
 @router.put("/{user_id}", response_model=UserResponse)
 def update_users(user_id: int, full_name: Optional[str] = None, phone: Optional[str] = None, 
-                current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
+                current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
     data = update_user(user_id=user_id, full_name=full_name, phone=phone, current_user=current_user, db=db)
 
     return data
 
 
 @router.get("/profile", response_model=UserResponse)
-def get_profile(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER]))):
+def get_profile(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER]))):
 
     return get_profiles(current_user)
 
 @router.post("/upload/profile-picture")
-async def upload_user_profile(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
+async def upload_user_profile(file: UploadFile = File(...), current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER])), db: Session = Depends(get_db)):
     
     return await upload_profile_picture(file, current_user, db)
