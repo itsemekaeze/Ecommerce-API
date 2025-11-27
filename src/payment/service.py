@@ -6,7 +6,7 @@ from src.database.core import get_db
 from src.payment.models import PaymentCreate
 from src.entities.users import User, UserRole
 import uuid
-from src.auth.service import get_current_user, require_role
+from src.auth.service import require_role
 
 
 def process_payment(payment_data: PaymentCreate, current_user: User = Depends(require_role([UserRole.CUSTOMER,UserRole.SELLER, UserRole.ADMIN])), db: Session = Depends(get_db)):
@@ -49,7 +49,7 @@ def get_payment(payment_id: int, current_user: User = Depends(require_role([User
         raise HTTPException(status_code=404, detail="Payment not found")
     
     order = db.query(Order).filter(Order.id == payment.order_id).first()
-    if order.customer_id != current_user.id and current_user.role != UserRole.ADMIN:
+    if order.customer_id != current_user.id and current_user.role not in [UserRole.ADMIN, UserRole.SELLER, UserRole.CUSTOMER]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     return payment

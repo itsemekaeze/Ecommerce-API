@@ -1,15 +1,13 @@
 from src.order.models import OrderCreate, OrderStatusUpdate
-from src.auth.service import get_current_user
 from sqlalchemy.orm import Session
 from src.entities.users import User
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from src.database.core import get_db
 from src.entities.order import Order, OrderItem, OrderStatus
 from src.entities.carts import CartItem
 from src.users.models import UserRole
 from datetime import datetime
 from src.auth.service import require_role
-
 
 
 def create_order(
@@ -88,7 +86,7 @@ def get_order(order_id: int, current_user: User = Depends(require_role([UserRole
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if order.customer_id != current_user.id and current_user.role not in [UserRole.ADMIN, UserRole.CUSTOMER]:
+    if order.customer_id != current_user.id and current_user.role not in [UserRole.ADMIN, UserRole.SELLER, UserRole.CUSTOMER]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
     

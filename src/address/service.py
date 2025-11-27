@@ -2,7 +2,7 @@ from src.address.models import AddressCreate
 from src.auth.service import get_current_user, require_role
 from sqlalchemy.orm import Session
 from src.entities.users import User, UserRole
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from src.database.core import get_db
 from src.entities.shipping_address import Address
 

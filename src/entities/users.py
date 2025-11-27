@@ -10,7 +10,6 @@ class UserRole(str, enum.Enum):
     SELLER = "seller"
     CUSTOMER = "customer"
 
-
 class User(Base):
     __tablename__ = "users"
     

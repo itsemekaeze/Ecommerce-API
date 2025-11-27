@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database.core import get_db
 from src.review.models import ReviewCreate, ReviewResponse
 from src.entities.users import User, UserRole
-from src.auth.service import get_current_user, require_role
+from src.auth.service import  require_role
 from src.review.service import create_review
 
 router = APIRouter(

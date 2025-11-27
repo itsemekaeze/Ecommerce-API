@@ -126,7 +126,7 @@ async def upload_product_image(file: UploadFile = File(...), current_user: User 
     saved_path = save_upload_file(file, PRODUCT_IMAGES_DIR)
 
     
-    upload_result = cloudinary.uploader.upload(saved_path, folder="Uploading")
+    upload_result = cloudinary.uploader.upload(saved_path, folder="Uploading images")
 
     
     image_url = upload_result.get("secure_url")

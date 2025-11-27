@@ -86,7 +86,7 @@ def send_verification_email(email: str, token: str) -> dict:
         server.quit()
         
 
-        return {"success": True, "message": "Verification email sent successfully", "verification_link": None, "token": None}
+        return {"success": True, "message": "Verification email sent successfully"}
         
     except smtplib.SMTPAuthenticationError as e:
         print(f"SMTP Authentication Error: {e}")

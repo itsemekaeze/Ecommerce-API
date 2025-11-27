@@ -4,7 +4,7 @@ from src.entities.category import Category
 from fastapi import Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 from src.database.core import get_db
-from src.auth.service import require_role, get_current_user
+from src.auth.service import require_role
 from src.users.models import UserRole
 
 

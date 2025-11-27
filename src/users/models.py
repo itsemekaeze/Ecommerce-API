@@ -1,6 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
-from src.entities.users import UserRole
 
 class UserResponse(BaseModel):
     id: int
@@ -8,7 +7,6 @@ class UserResponse(BaseModel):
     username: str
     full_name: Optional[str]
     phone: Optional[str]
-    # role: UserRole
     is_active: bool
     
     class Config:

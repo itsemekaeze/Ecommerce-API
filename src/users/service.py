@@ -1,11 +1,9 @@
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, UploadFile, status
-from src.users.models import UserRole
-from src.entities.users import User
+from fastapi import Depends, HTTPException, UploadFile
+from src.entities.users import User, UserRole
 from src.auth.service import require_role
 from src.database.core import get_db
 from typing import Optional
-import os
 from src.upload_settings import validate_image_file, save_upload_file, PROFILE_IMAGES_DIR
 from src.entities.images import Image
 from ..cloudinary_config import cloudinary
@@ -35,7 +33,7 @@ def update_user(user_id: int, full_name: Optional[str] = None, phone: Optional[s
     return user
 
 
-def get_profiles(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER]))):
+def user_profiles(current_user: User = Depends(require_role([UserRole.SELLER, UserRole.ADMIN, UserRole.CUSTOMER]))):
    
     return current_user
 
@@ -47,7 +45,7 @@ async def upload_profile_picture(file: UploadFile, current_user: User = Depends(
 
     
     upload_result = cloudinary.uploader.upload(saved_path,
-                                               folder="Uploading")
+                                               folder="Uploading Images")
 
     image_url = upload_result.get("secure_url")
     public_id = upload_result.get("public_id")

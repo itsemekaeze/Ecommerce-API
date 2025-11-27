@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from src.database.core import get_db
-from src.entities.users import User, UserRole
-from pydantic import EmailStr
+from src.entities.users import User
+from pydantic import EmailStr 
 from fastapi.security import OAuth2PasswordRequestForm
-from src.auth.service import verify_password, create_access_token, get_hashed_password, get_current_user
-from src.auth.models import Token, UserCreate, UserResponse, EmailVerificationResponse
+from src.auth.service import verify_password, create_access_token, get_hashed_password
+from src.auth.models import Token, UserCreate, EmailVerificationResponse
 from src.email.service import create_verification_token, send_verification_email
 
 

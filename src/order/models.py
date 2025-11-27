@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator
 from datetime import datetime
 from typing import List
 from src.entities.order import OrderStatus
+
 class OrderCreate(BaseModel):
     shipping_address_id: int
     cart_item_ids: List[int] 
